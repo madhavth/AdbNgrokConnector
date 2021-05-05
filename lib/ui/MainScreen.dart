@@ -5,6 +5,8 @@ import 'package:ngrok_connector/AdbDevice.dart';
 import 'package:ngrok_connector/adb_helper/adbhelper.dart';
 import 'package:ngrok_connector/bloc/adb_helper/adb_helper_cubit.dart';
 
+import '../bloc/adb_helper/adb_helper_cubit.dart';
+
 class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -36,6 +38,7 @@ class MainScreen extends StatelessWidget {
       }
     }, builder: (ctx, state) {
       final list = context.read<AdbHelperCubit>().connectedDevices;
+      final isProcessing = context.read<AdbHelperCubit>().isProcessing;
 
       if (list.isEmpty)
         return Center(
@@ -55,6 +58,14 @@ class MainScreen extends StatelessWidget {
         },
       );
     });
+  }
+}
+
+class LoadingProgress extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return LinearProgressIndicator(minHeight: 24.h,
+    );
   }
 }
 

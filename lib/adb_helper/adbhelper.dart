@@ -11,7 +11,7 @@ class AdbHelper {
   {
     if(Platform.isWindows)
       {
-        return "assets/windows/adb.exe";
+        return "assets\\windows\\adb.exe";
       }
     else if(Platform.isLinux)
       return "assets/linux/adb";
@@ -25,7 +25,7 @@ class AdbHelper {
       return "assets/linux/ngrok";
 
     else if(Platform.isWindows)
-        return "assets/windows/ngrok.exe";
+        return "assets\\windows\\ngrok.exe";
 
     else
       throw Exception("not implemented getNgrokPath for ${Platform.operatingSystem}");
@@ -88,7 +88,7 @@ class AdbHelper {
     try {
       Shell shell = getShellInstance();
       final ip = await shell.run(
-          "$getAdbPath() -s $deviceName shell ip route");
+          "${getAdbPath()} -s $deviceName shell ip route");
 
       final tempList = ip.outText.split(" ");
 
@@ -104,9 +104,9 @@ class AdbHelper {
   static Future<bool> connectDeviceByIp(AdbDevice device) async
   {
     final shell = getShellInstance();
-    final cmd = await shell.run("$getAdbPath() -s ${device.deviceName} tcpip 5555");
+    final cmd = await shell.run("${getAdbPath()} -s ${device.deviceName} tcpip 5555");
     await Future.delayed(Duration(seconds: 1));
-    final last = await shell.run("$getAdbPath() connect ${device.deviceIp}:5555");
+    final last = await shell.run("${getAdbPath()} connect ${device.deviceIp}:5555");
     if(last.errText=="")
       {
         return true;
@@ -119,6 +119,11 @@ class AdbHelper {
   
   static Future<bool> killNgrok() async
   {
+    if(Platform.isWindows)
+      {
+        getShellInstance().kill();
+      }
+
     if(!Platform.isLinux)
       {
         return false;

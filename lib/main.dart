@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'bloc/start_screen/start_screen_cubit.dart';
+import 'ui/MainScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,12 +71,18 @@ class _MyHomePageState extends State<MyHomePage> {
             BlocBuilder<AdbHelperCubit, AdbHelperState>(
               builder: (context, state) {
                 final list = context.read<AdbHelperCubit>().connectedDevices;
+                final isLoading = context.read<AdbHelperCubit>().isProcessing;
 
-                return Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: Text(list.isNotEmpty
-                        ? 'click on the list element to start ngrok session'
-                        : "add a device then click refresh to show the connected device"));
+                return Column(
+                  children: [
+                    isLoading? LoadingProgress():SizedBox(),
+                    Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: Text(list.isNotEmpty
+                            ? 'click on the list element to start ngrok session'
+                            : "add a device then click refresh to show the connected device")),
+                  ],
+                );
               },
             )
           ],

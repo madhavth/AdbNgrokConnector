@@ -9,9 +9,14 @@ import 'package:process_run/shell.dart';
 import 'dart:async';
 
 import 'package:watcher/watcher.dart';
+
 part 'adb_helper_state.dart';
 
 class AdbHelperCubit extends Cubit<AdbHelperState> {
+  bool _isProcessing = false;
+
+  bool get isProcessing => _isProcessing;
+
   AdbHelperCubit() : super(AdbHelperInitial()) {
     getDevices();
     watchForChangesInUsbDevices();
@@ -29,8 +34,7 @@ class AdbHelperCubit extends Cubit<AdbHelperState> {
 
   Timer? timer;
 
-  void watchForChangesInUsbDevices() async
-  {
+  void watchForChangesInUsbDevices() async {
     timer = Timer.periodic(Duration(seconds: 2), (timer) async {
       await getDevices();
     });
@@ -41,18 +45,16 @@ class AdbHelperCubit extends Cubit<AdbHelperState> {
     // });
   }
 
-  Future<void> readFileAndUpdateUi(File file) async
-  {
+  Future<void> readFileAndUpdateUi(File file) async {
     var text = await file.readAsString();
     var map = jsonDecode(text);
     testFileText = map['value'].toString();
     emit(TestFileState(testFileText));
   }
 
-
-
   void pressedItem(AdbDevice device) async {
     try {
+      _isProcessing = true;
       print('tapping this button');
       await AdbHelper.killNgrok();
       if (!device.deviceName.contains(device.deviceIp)) {
@@ -65,8 +67,15 @@ class AdbHelperCubit extends Cubit<AdbHelperState> {
         await getDevices();
       }
 
-      startNgrokForward(device);
+      emit(AdbHelperMessageState("processing..."));
+      await startNgrokForward(device);
+      _isProcessing = true;
     } catch (e) {
+      _isProcessing = false;
+
+      if (e is ShellException) {
+        return;
+      }
       emit(AdbHelperMessageState("Something went wrong"));
       print('exception $e occurred');
       return;
@@ -80,13 +89,13 @@ class AdbHelperCubit extends Cubit<AdbHelperState> {
     await super.close();
   }
 
-  void startNgrokForward(AdbDevice device) async {
+  Future<void> startNgrokForward(AdbDevice device) async {
     final shell = AdbHelper.getShellInstance();
     await shell.run(
         "${AdbHelper.getNgrokPath()} authtoken 2CAzHxuDB3e9q5UBiA2MA_6TG3rRv1kvwJ2vk7KA2R8");
-    await shell
-        .run(" ${AdbHelper.getNgrokPath()} tcp ${device.deviceIp}:5555 -region in",
-            onProcess: (Process? process) async {
+    await shell.run(
+        " ${AdbHelper.getNgrokPath()} tcp ${device.deviceIp}:5555 -region in",
+        onProcess: (Process? process) async {
       final shell2 = Shell();
       await Future.delayed(Duration(seconds: 3));
       final data = await shell2.run("curl -s localhost:4040/api/tunnels");
