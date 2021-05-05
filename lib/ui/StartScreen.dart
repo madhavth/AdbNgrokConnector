@@ -15,12 +15,11 @@ class StartScreen extends StatelessWidget {
     return Scaffold(
       body: BlocBuilder<StartScreenCubit, StartScreenState>(
               builder: (ctx, state) {
-                if(state is StartScreenSatisfiesAllConditions)
-                  {
+                // if(state is StartScreenSatisfiesAllConditions)
+                //   {
                     return MyHomePage(title: 'Ngrok connector building');
-                  }
-
-                return CheckNgrokAdbInstalled();
+                  // }
+                // return CheckNgrokAdbInstalled();
           }),
     );
   }

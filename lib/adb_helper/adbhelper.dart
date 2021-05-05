@@ -48,7 +48,7 @@ class AdbHelper {
   {
     Shell shell = getShellInstance();
     List<AdbDevice> devices=[];
-    final op = await shell.run("assets/linux/adb devices");
+    final op = await shell.run("${getAdbPath()} devices");
     if(op.isNotEmpty && op.first.errText == "" && op.first.exitCode == 0)
       {
         devices= await parseDevices(op.first.outText);
