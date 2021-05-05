@@ -18,8 +18,16 @@ class AdbHelperCubit extends Cubit<AdbHelperState> {
   bool get isProcessing => _isProcessing;
 
   AdbHelperCubit() : super(AdbHelperInitial()) {
+    getCurrentDirectory();
     getDevices();
     watchForChangesInUsbDevices();
+  }
+
+  getCurrentDirectory() async
+  {
+    final shell = AdbHelper.getShellInstance();
+    print('shell current path is ${shell.path}');
+    emit(AdbHelperMessageState("${shell.path}"));
   }
 
   List<AdbDevice> connectedDevices = [];

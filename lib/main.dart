@@ -76,6 +76,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 return Column(
                   children: [
                     isLoading? LoadingProgress():SizedBox(),
+                    Text("${AdbHelper.getShellInstance().path}", style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold
+                    ),),
                     Padding(
                         padding: EdgeInsets.only(bottom: 12.h),
                         child: Text(list.isNotEmpty

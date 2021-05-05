@@ -52,11 +52,7 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - assets/linux/adb
-    - assets/linux/ngrok
-    - assets/windows/adb.exe
-    - assets/windows/ngrok.exe
+#  assets:
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

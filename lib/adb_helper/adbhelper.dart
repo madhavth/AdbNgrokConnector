@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:process_run/shell.dart';
 
 import '../AdbDevice.dart';
@@ -9,9 +10,10 @@ class AdbHelper {
 
   static String getAdbPath()
   {
+    final path = getShellInstance().path;
     if(Platform.isWindows)
       {
-        return "assets\\windows\\adb.exe";
+        return "$path\\assets\\windows\\adb.exe";
       }
     else if(Platform.isLinux)
       return "assets/linux/adb";
@@ -21,11 +23,13 @@ class AdbHelper {
 
   static String getNgrokPath()
   {
+    final path = getShellInstance().path;
+
     if(Platform.isLinux)
       return "assets/linux/ngrok";
 
     else if(Platform.isWindows)
-        return "assets\\windows\\ngrok.exe";
+        return "$path\\assets\\windows\\ngrok.exe";
 
     else
       throw Exception("not implemented getNgrokPath for ${Platform.operatingSystem}");
