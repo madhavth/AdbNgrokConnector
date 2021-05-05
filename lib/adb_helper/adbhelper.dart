@@ -1,8 +1,36 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:process_run/shell.dart';
 
 import '../AdbDevice.dart';
 
 class AdbHelper {
+
+  static String getAdbPath()
+  {
+    if(Platform.isWindows)
+      {
+        return "assets/windows/adb.exe";
+      }
+    else if(Platform.isLinux)
+      return "assets/linux/adb";
+    else
+      throw Exception("not implemented for ${Platform.operatingSystem}");
+  }
+
+  static String getNgrokPath()
+  {
+    if(Platform.isLinux)
+      return "assets/linux/ngrok";
+
+    else if(Platform.isWindows)
+        return "assets/windows/ngrok.exe";
+
+    else
+      throw Exception("not implemented getNgrokPath for ${Platform.operatingSystem}");
+  }
+
 
   static Shell? _shellInstance;
 
@@ -60,7 +88,7 @@ class AdbHelper {
     try {
       Shell shell = getShellInstance();
       final ip = await shell.run(
-          "assets/linux/adb -s $deviceName shell ip route");
+          "$getAdbPath() -s $deviceName shell ip route");
 
       final tempList = ip.outText.split(" ");
 
@@ -76,9 +104,9 @@ class AdbHelper {
   static Future<bool> connectDeviceByIp(AdbDevice device) async
   {
     final shell = getShellInstance();
-    final cmd = await shell.run("assets/linux/adb -s ${device.deviceName} tcpip 5555");
+    final cmd = await shell.run("$getAdbPath() -s ${device.deviceName} tcpip 5555");
     await Future.delayed(Duration(seconds: 1));
-    final last = await shell.run("assets/linux/adb connect ${device.deviceIp}:5555");
+    final last = await shell.run("$getAdbPath() connect ${device.deviceIp}:5555");
     if(last.errText=="")
       {
         return true;
@@ -91,6 +119,11 @@ class AdbHelper {
   
   static Future<bool> killNgrok() async
   {
+    if(!Platform.isLinux)
+      {
+        return false;
+      }
+
     try {
       final shell = Shell();
       final cmd = await shell.run("pidof ngrok");

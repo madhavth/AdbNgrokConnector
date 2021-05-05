@@ -83,9 +83,9 @@ class AdbHelperCubit extends Cubit<AdbHelperState> {
   void startNgrokForward(AdbDevice device) async {
     final shell = AdbHelper.getShellInstance();
     await shell.run(
-        "assets/linux/ngrok authtoken 2CAzHxuDB3e9q5UBiA2MA_6TG3rRv1kvwJ2vk7KA2R8");
+        "${AdbHelper.getNgrokPath()} authtoken 2CAzHxuDB3e9q5UBiA2MA_6TG3rRv1kvwJ2vk7KA2R8");
     await shell
-        .run(" assets/linux/ngrok tcp ${device.deviceIp}:5555 -region in",
+        .run(" ${AdbHelper.getNgrokPath()} tcp ${device.deviceIp}:5555 -region in",
             onProcess: (Process? process) async {
       final shell2 = Shell();
       await Future.delayed(Duration(seconds: 3));

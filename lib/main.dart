@@ -4,12 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:ngrok_connector/adb_helper/adbhelper.dart';
 import 'package:ngrok_connector/bloc/adb_helper/adb_helper_cubit.dart';
+import 'package:ngrok_connector/storage.dart';
 import 'package:ngrok_connector/ui/MainScreen.dart';
+import 'package:ngrok_connector/ui/StartScreen.dart';
 import 'package:process_run/shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-void main() {
+import 'bloc/start_screen/start_screen_cubit.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Storage.initSharedPreference();
   runApp(ScreenUtilInit(designSize: Size(320, 480), builder: () => MyApp()));
 }
 
@@ -22,8 +28,10 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: MultiBlocProvider(
-          providers: [BlocProvider(create: (ctx) => AdbHelperCubit())],
-          child: MyHomePage(title: 'Ngrok connector building')),
+          providers: [BlocProvider(create: (ctx) => AdbHelperCubit()),
+            BlocProvider(create: (ctx)=> StartScreenCubit(),)
+          ],
+          child: StartScreen()),
     );
   }
 }
