@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:process_run/shell.dart';
 
 import '../AdbDevice.dart';
@@ -52,10 +50,11 @@ class AdbHelper {
   {
     Shell shell = getShellInstance();
     List<AdbDevice> devices=[];
-    final op = await shell.run("${getAdbPath()} devices");
-    if(op.isNotEmpty && op.first.errText == "" && op.first.exitCode == 0)
+    final op = await Process.run("${getAdbPath()}", ["devices"]);
+    // final op = await shell.run("assets/linux/adb devices");
+    if(op.errText == "" && op.exitCode == 0)
       {
-        devices= await parseDevices(op.first.outText);
+        devices= await parseDevices(op.outText);
       }
 
     return devices;
@@ -91,8 +90,8 @@ class AdbHelper {
   {
     try {
       Shell shell = getShellInstance();
-      final ip = await shell.run(
-          "${getAdbPath()} -s $deviceName shell ip route");
+      final ip = await Process.run(
+          "${getAdbPath()}" ,"-s $deviceName shell ip route".split(" "));
 
       final tempList = ip.outText.split(" ");
 
@@ -123,16 +122,6 @@ class AdbHelper {
   
   static Future<bool> killNgrok() async
   {
-    if(Platform.isWindows)
-      {
-        getShellInstance().kill();
-      }
-
-    if(!Platform.isLinux)
-      {
-        return false;
-      }
-
     try {
       final shell = Shell();
       final cmd = await shell.run("pidof ngrok");
