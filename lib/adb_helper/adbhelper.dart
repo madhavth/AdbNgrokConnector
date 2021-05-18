@@ -5,123 +5,110 @@ import 'package:process_run/shell.dart';
 import '../AdbDevice.dart';
 
 class AdbHelper {
-
-  static String getAdbPath()
-  {
+  static String getAdbPath() {
     final path = getShellInstance().path;
-    if(Platform.isWindows)
-      {
-        return "$path\\assets\\windows\\adb.exe";
-      }
-    else if(Platform.isLinux)
+
+    String? whAdb = whichSync("adb");
+
+    if (whAdb != null) return whAdb;
+
+    if (Platform.isWindows) {
+      return "$path\\assets\\windows\\adb.exe";
+    } else if (Platform.isLinux)
       return "assets/linux/adb";
     else
       throw Exception("not implemented for ${Platform.operatingSystem}");
   }
 
-  static String getNgrokPath()
-  {
+  static String getNgrokPath() {
     final path = getShellInstance().path;
 
-    if(Platform.isLinux)
+    String? wh = whichSync("ngrok");
+
+    if (wh != null) return wh;
+
+    if (Platform.isLinux)
       return "assets/linux/ngrok";
-
-    else if(Platform.isWindows)
-        return "$path\\assets\\windows\\ngrok.exe";
-
+    else if (Platform.isWindows)
+      return "$path\\assets\\windows\\ngrok.exe";
     else
-      throw Exception("not implemented getNgrokPath for ${Platform.operatingSystem}");
+      throw Exception(
+          "not implemented getNgrokPath for ${Platform.operatingSystem}");
   }
-
 
   static Shell? _shellInstance;
 
-  static Shell getShellInstance()
-  {
-    if(_shellInstance==null)
-      {
-        _shellInstance = Shell();
-      }
+  static Shell getShellInstance() {
+    if (_shellInstance == null) {
+      _shellInstance = Shell();
+    }
 
     return _shellInstance!;
   }
 
-  static Future<List<AdbDevice>> getDeviceConnected() async
-  {
+  static Future<List<AdbDevice>> getDeviceConnected() async {
     Shell shell = getShellInstance();
-    List<AdbDevice> devices=[];
+    List<AdbDevice> devices = [];
     final op = await Process.run("${getAdbPath()}", ["devices"]);
     // final op = await shell.run("assets/linux/adb devices");
-    if(op.errText == "" && op.exitCode == 0)
-      {
-        devices= await parseDevices(op.outText);
-      }
+    if (op.errText == "" && op.exitCode == 0) {
+      devices = await parseDevices(op.outText);
+    }
 
     return devices;
   }
 
-  static Future<List<AdbDevice>> parseDevices(String devices) async
-  {
+  static Future<List<AdbDevice>> parseDevices(String devices) async {
     List<AdbDevice> myDevices = [];
-    List<String> deviceList= devices.split("\n");
-    if(deviceList.isNotEmpty)
-      {
-        deviceList.removeAt(0); // removes List of devices attached
-        deviceList.removeWhere((element) => element.isEmpty);
+    List<String> deviceList = devices.split("\n");
+    if (deviceList.isNotEmpty) {
+      deviceList.removeAt(0); // removes List of devices attached
+      deviceList.removeWhere((element) => element.isEmpty);
 
-        for(var element in deviceList)
-          {
-            final temp = element.split("\t");
+      for (var element in deviceList) {
+        final temp = element.split("\t");
 
-            if(temp.isNotEmpty)
-            {
-              String? deviceIp = await getDeviceIp(temp.first);
-              if(deviceIp!=null)
-                myDevices.add(AdbDevice(temp.first, deviceIp));
-            }
-          }
+        if (temp.isNotEmpty) {
+          String? deviceIp = await getDeviceIp(temp.first);
+          if (deviceIp != null) myDevices.add(AdbDevice(temp.first, deviceIp));
+        }
       }
+    }
 
     print(myDevices);
     return myDevices;
   }
 
-  static Future<String?> getDeviceIp(String deviceName) async
-  {
+  static Future<String?> getDeviceIp(String deviceName) async {
     try {
       Shell shell = getShellInstance();
       final ip = await Process.run(
-          "${getAdbPath()}" ,"-s $deviceName shell ip route".split(" "));
+          "${getAdbPath()}", "-s $deviceName shell ip route".split(" "));
 
       final tempList = ip.outText.split(" ");
 
-      return tempList[tempList.length-2];
-    }
-    catch(e)
-    {
+      return tempList[tempList.length - 2];
+    } catch (e) {
       print('exception $e occurred');
       return null;
     }
   }
-  
-  static Future<bool> connectDeviceByIp(AdbDevice device) async
-  {
+
+  static Future<bool> connectDeviceByIp(AdbDevice device) async {
     final shell = getShellInstance();
-    final cmd = await shell.run("${getAdbPath()} -s ${device.deviceName} tcpip 5555");
+    final cmd =
+        await shell.run("${getAdbPath()} -s ${device.deviceName} tcpip 5555");
     await Future.delayed(Duration(seconds: 1));
-    final last = await shell.run("${getAdbPath()} connect ${device.deviceIp}:5555");
-    if(last.errText=="")
-      {
-        return true;
-      }
+    final last =
+        await shell.run("${getAdbPath()} connect ${device.deviceIp}:5555");
+    if (last.errText == "") {
+      return true;
+    }
 
     return false;
   }
 
-
-  
-  static Future<bool> killNgrok() async
-  {
+  static Future<bool> killNgrok() async {
     try {
       final shell = Shell();
       final cmd = await shell.run("pidof ngrok");
@@ -132,9 +119,7 @@ class AdbHelper {
           return true;
         }
       }
-    }
-    catch(e)
-    {
+    } catch (e) {
       return false;
     }
 

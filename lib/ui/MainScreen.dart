@@ -27,7 +27,7 @@ class MainScreen extends StatelessWidget {
                 actions: [
                   TextButton(
                     onPressed: () async {
-                      await AdbHelper.killNgrok();
+                      await context.read<AdbHelperCubit>().killNgrok();
                       Navigator.pop(context);
                     },
                     child: Text("Cancel"),
@@ -64,7 +64,8 @@ class MainScreen extends StatelessWidget {
 class LoadingProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return LinearProgressIndicator(minHeight: 24.h,
+    return LinearProgressIndicator(
+      minHeight: 24.h,
     );
   }
 }

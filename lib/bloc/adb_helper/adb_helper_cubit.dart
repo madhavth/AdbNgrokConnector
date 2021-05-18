@@ -15,7 +15,7 @@ part 'adb_helper_state.dart';
 class AdbHelperCubit extends Cubit<AdbHelperState> {
   bool _isProcessing = false;
 
-  bool get isProcessing => _isProcessing;
+  bool get isProcessing => this._isProcessing;
 
   AdbHelperCubit() : super(AdbHelperInitial()) {
     getCurrentDirectory();
@@ -119,4 +119,10 @@ class AdbHelperCubit extends Cubit<AdbHelperState> {
       shell2.kill();
     });
   }
+
+   killNgrok() async {
+     await AdbHelper.killNgrok();
+     _isProcessing = false;
+     emit(AdbHelperMessageState("terminating ngrok session"));
+   }
 }
